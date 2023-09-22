@@ -55,7 +55,6 @@ int main() {
         if (strlen(input) <= 1) { //comando vacio (solo presionar enter)
             continue;
         }
-
         parse_input(input, &command, arguments);  //parsear entrada
 
         if (strcmp(command, "exit") == 0) { //terminar shell
