@@ -6,6 +6,9 @@
 #include <sys/wait.h>
 #include <stdbool.h>
 
+#include <sys/stat.h>
+#include <syslog.h>
+
 char *read_input() { //leer una linea de entrada
     char *input = NULL;
     size_t input_size = 0;
@@ -70,6 +73,75 @@ void execute_commands(char *commands[][100], int num_commands) {
         }    
     }
 }
+
+
+//////////////
+////daemon////
+//////////////
+void log_system_info() {
+    FILE *cpuinfo_file = fopen("/proc/cpuinfo", "r");
+    if (cpuinfo_file == NULL) {
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+
+    char line[1024];
+    while (fgets(line, sizeof(line), cpuinfo_file)) {
+        // Extract and log relevant information from /proc/cpuinfo.
+        if (strstr(line, "processor") || strstr(line, "procs_running") || strstr(line, "procs_blocked")) {
+            syslog(LOG_INFO, "%s", line);
+        }
+    }
+
+    fclose(cpuinfo_file);
+}
+
+void start_daemon(int t, int p) {
+    // Fork to create a daemon.
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+
+    if (pid > 0) {
+        // Parent process (shell) displays a message.
+        printf("Daemon started with PID: %d\n", pid);
+        return; // Return to the shell.
+    }
+
+    // Child process (daemon) continues here.
+
+    // Create a new session and detach from the terminal.
+    setsid();
+
+    // Set the umask to an appropriate value.
+    umask(0);
+
+    // Open the system log.
+    openlog("system_info_daemon", LOG_PID, LOG_DAEMON);
+
+    // Main loop to log system information.
+	while (p > 0) {
+		// Read and log system information from /proc/cpuinfo.
+        // Example: read from /proc/cpuinfo, collect the required data, and use syslog to log it.
+        log_system_info(); // Log system information from /proc/cpuinfo.
+
+        // Sleep for 't' seconds.
+        sleep(t);
+
+        // Decrease the remaining time.
+        p -= t;
+    }
+
+    // Clean up and exit.
+    closelog();
+}
+//////////////
+////daemon////
+//////////////
+
 
 int main() {
     char *input;
