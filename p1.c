@@ -157,23 +157,19 @@ int main() {
         }
         parse_input(input, commands, &num_commands);  //parsear entrada
 
-	/*if (strcmp(commands[0][0], "exit") == 0) { //terminar shell
+	if (strcmp(commands[0][0], "exit") == 0) { //terminar shell
             break;
-        } else if (strcmp(commands[0][0], "daemon") == 0) {
+        } else if (strcmp(commands[0][0], "daemon") == 0) { //comando para daemon
 		if (commands[0][1] == NULL && commands[0][2] == NULL) {
-                printf("Uso: daemon <t> <p>\n");
-            	} else {
-                int t = atoi(commands[0][1]);
-                int p = atoi(commands[0][2]);
-                start_daemon(t, p);
-            }
+		printf("Uso: daemon <t> <p>\n");
+		} else {
+		int t = atoi(commands[0][1]);
+		int p = atoi(commands[0][2]);
+		start_daemon(t, p);
+		}
 	} else {
-            execute_commands(commands, num_commands);  //ejecutar comando
-        }*/
-
-	    
-        execute_commands(commands, num_commands);
+            execute_commands(commands, num_commands);  //ejecutar comandos
+        }
     }
-
     return 0;
 }
