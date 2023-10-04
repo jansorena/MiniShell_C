@@ -15,7 +15,7 @@ char* read_input() { //leer una linea de entrada
   return input;
 }
 
-void parse_input(char* input, char* commands[][100], int* num_commands) {
+void parse_input(char* input, char* commands[][100], int* num_commands) { //parsear entrada
   *num_commands = 0;
   char* ptr_pipes;
   char* token = strtok_r(input, "|\n", &ptr_pipes);
@@ -37,7 +37,7 @@ void parse_input(char* input, char* commands[][100], int* num_commands) {
   }
 }
 
-void execute_commands(char* commands[][100], int num_commands) {
+void execute_commands(char* commands[][100], int num_commands) { //ejecutar comando o comandos
   int i, prev_pipe, fd[2];
   prev_pipe = STDIN_FILENO;
   pid_t pids[num_commands]; // Almacenar los PID de los procesos hijos
@@ -73,7 +73,7 @@ void execute_commands(char* commands[][100], int num_commands) {
   }
 }
 
-void start_daemon(int t, int p) {
+void start_daemon(int t, int p) { //ejecutar el daemon
   // Fork to create a daemon.
   pid_t pid = fork();
 
@@ -144,7 +144,7 @@ int main() {
 
     if (strcmp(commands[0][0], "exit") == 0) { //terminar shell
       break;
-    } else if (strcmp(commands[0][0], "daemon") == 0) { //comando para daemon
+    } else if (strcmp(commands[0][0], "daemon") == 0) { //comando para ejecutar daemon
       if (commands[0][1] == NULL && commands[0][2] == NULL) {
         printf("Uso: daemon <t> <p>\n");
       } else {
@@ -153,7 +153,7 @@ int main() {
         start_daemon(t, p);
       }
     } else {
-      execute_commands(commands, num_commands); //ejecutar comandos
+      execute_commands(commands, num_commands); //ejecutar comando o comandos
     }
   }
   
