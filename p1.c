@@ -79,7 +79,7 @@ void execute_commands(char *commands[][100], int num_commands) {
 ////daemon////
 //////////////
 void log_system_info() {
-    FILE *cpuinfo_file = fopen("/proc/cpuinfo", "r");
+    FILE *cpuinfo_file = fopen("/proc/stat", "r"); //processes, procs_running y procs_blocked no estan en /proc/cpuinfo estan en /proc/stat
     if (cpuinfo_file == NULL) {
         perror("fopen");
         exit(EXIT_FAILURE);
@@ -88,7 +88,7 @@ void log_system_info() {
     char line[1024];
     while (fgets(line, sizeof(line), cpuinfo_file)) {
         // Extract and log relevant information from /proc/cpuinfo.
-        if (strstr(line, "processor") || strstr(line, "procs_running") || strstr(line, "procs_blocked")) {
+        if (strstr(line, "processes") || strstr(line, "procs_running") || strstr(line, "procs_blocked")) {
             syslog(LOG_INFO, "%s", line);
         }
     }
