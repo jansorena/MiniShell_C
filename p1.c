@@ -32,7 +32,7 @@ void parse_input(char* input, char* commands[][100], int* num_commands) {
       command_token = strtok_r(NULL, " ", &ptr_cmds);
     }
     commands[*num_commands][arg_index] = NULL;
-    (*num_commands) ++;
+    (*num_commands)++;
     token = strtok_r(NULL, "|\n", &ptr_pipes);
   }
 }
@@ -97,7 +97,7 @@ void start_daemon(int t, int p) {
   umask(0);
 
   // Open the system log.
-  openlog("system_info_daemon", LOG_PID, LOG_DAEMON);
+  openlog("system_info_daemon", LOG_PID, LOG_DAEMON); //logea en syslog con nombre system_info_daemon
 
   // Main loop to log system information.
   while (p > 0) {
@@ -112,7 +112,7 @@ void start_daemon(int t, int p) {
     char line[1024];
     while (fgets(line, sizeof(line), cpuinfo_file)) {
       // Extract and log relevant information from /proc/cpuinfo.
-      if (strstr(line, "processes") || strstr(line, "procs_running") || strstr(line, "procs_blocked")) {
+      if (strstr(line, "processes") || strstr(line, "procs_running") || strstr(line, "procs_blocked")) { //si la linea corresponde a processes, procs_running o procs_blocked, la logea en syslog
         syslog(LOG_INFO, "%s", line);
       }
     }
