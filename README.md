@@ -12,25 +12,7 @@ $ cmake ..
 
 $ make
 
-La shell soporta comandos simples como:
-
-mishell:$ ls
-
-mishell:$ echo
-
-mishell:$ cat
-
-mishell:$ grep
-
-mishell:$ head
-
-mishell:$ tail
-
-mishell:$ wc
-
-mishell:$ sort
-
-mishell:$ paste
+La shell soporta comandos simples como ls, echo, cat, grep, head, tail, wc, sort, etc.
 
 Además, soporta comandos con pipes, del tipo $comando1 | comando2 | ... | comandon-ésimo tales como:
 
