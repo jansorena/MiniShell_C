@@ -1,14 +1,8 @@
 # Proyecto1_SistemasOperativos
 
-Para compilar la shell, se debe seguir el proceso habitual de compilado con cmake:
+Para compilar la shell, se debe realizar make en el directorio correspondiente:
 
 console 
-
-$ mkdir build
-
-$ cd build
-
-$ cmake ..
 
 $ make
 
