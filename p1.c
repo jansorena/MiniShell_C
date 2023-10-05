@@ -60,9 +60,13 @@ void execute_commands(char* commands[][100], int num_commands) { //ejecutar coma
       }
       close(fd[0]);
       // Ejecutar el comando actual
-      execvp(commands[i][0], commands[i]);
-      perror("execvp failed");
-      exit(EXIT_FAILURE);
+      if (execvp(commands[i][0], commands[i]) < 0) {
+        printf("Comando ingresado no existe\n");
+        exit(0);
+      }
+      //execvp(commands[i][0], commands[i])
+      //perror("execvp failed");
+      //exit(EXIT_FAILURE);
     } else {
       wait(NULL);
       // Cerrar el extremo de escritura del pipe actual (no es necesario en el proceso padre)
@@ -78,13 +82,11 @@ void start_daemon(int t, int p) { //ejecutar el daemon
   pid_t pid = fork();
 
   if (pid < 0) {
-    perror("fork");
-    exit(EXIT_FAILURE);
-  }
-
-  if (pid > 0) {
+    printf("error en fork\n");
+    exit(1);
+  } else if (pid > 0) {
     // Parent process (shell) displays a message.
-    printf("Daemon started with PID: %d\n", pid);
+    printf("Daemon creado con PID: %d\n", pid);
     return; // Return to the shell.
   }
 
@@ -97,7 +99,7 @@ void start_daemon(int t, int p) { //ejecutar el daemon
   umask(0);
 
   // Open the system log.
-  openlog("system_info_daemon", LOG_PID, LOG_DAEMON); //logea en syslog con nombre system_info_daemon
+  openlog("mi_daemon", LOG_PID, LOG_DAEMON); //logea en syslog con nombre system_info_daemon
 
   // Main loop to log system information.
   while (p > 0) {
