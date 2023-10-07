@@ -14,3 +14,8 @@ Además, soporta comandos con pipes, del tipo $comando1 | comando2 | ... | coman
 
 	mishell:$ ps -aux | sort -nr -k 4 | head -10
 	mishell:$ cat texto.txt | wc -w
+
+Para crear un daemon que mida y registre una línea con la información requerida del sistema en el log del sistema cada t segundos por un tiempo total de p segundos, se debe ejecutar el siguiente comando dentro de la shell:
+	mishell:$ daemon <t> <p>
+ Luego, para matar al daemon basta con ejecutar el comando kill junto con el PID del demonio desde otra terminal, de la siguiente manera:
+ 	$ kill <PID>
