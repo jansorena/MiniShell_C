@@ -57,7 +57,7 @@ void execute_commands(char* commands[][100], int num_commands) { //ejecutar coma
       }
       close(fd[0]);
       if (execvp(commands[i][0], commands[i]) < 0) { // Ejecutar el comando actual
-        perror("Comando ingresado no existe\n");
+        perror("Comando ingresado no existe");
         exit(EXIT_FAILURE);
       }
     } else {
@@ -78,7 +78,7 @@ void start_daemon(int t, int p) { // Ejecutar el daemon
     return; // Retorna a la shell.
   }
   // Proceso hijo (Daemon)
-  setsid(); // Crea una nueva sesion y se desprende de la terminal
+  setsid(); // Crea una nueva sesion y se desprende de la terminal (si se cierra la terminal no se mata el daemon)
   umask(0); // Archivos utilizados por el daemon tienen los permisos necesarios
   openlog("mi_daemon", LOG_PID, LOG_DAEMON); // logea en syslog con nombre "mi_daemon"
   while (p > 0) {
