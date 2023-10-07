@@ -8,25 +8,24 @@
 #include <sys/stat.h>
 #include <syslog.h>
 
-char* read_input() { //leer una linea de entrada
+char* read_input() { // leer una linea de entrada
   char* input = NULL;
   size_t input_size = 0;
   getline(&input, &input_size, stdin);
   return input;
 }
 
-void parse_input(char* input, char* commands[][100], int* num_commands) { //parsear entrada
+void parse_input(char* input, char* commands[][100], int* num_commands) { // parsear entrada
   *num_commands = 0;
   char* ptr_pipes;
-  char* token = strtok_r(input, "|\n", &ptr_pipes);
+  char* token = strtok_r(input, "|\n", &ptr_pipes); // primer strtok divide en comandos entre pipes
   while (token != NULL) {
     int arg_index = 0;
     while (*token == ' ') {
       ++token;
     }
     char* ptr_cmds;
-    char* command_token = strtok_r(token, " ", &ptr_cmds);
-
+    char* command_token = strtok_r(token, " ", &ptr_cmds); // divide cada uno en un comando y sus argumentos
     while (command_token != NULL) {
       commands[*num_commands][arg_index++] = command_token;
       command_token = strtok_r(NULL, " ", &ptr_cmds);
@@ -38,9 +37,8 @@ void parse_input(char* input, char* commands[][100], int* num_commands) { //pars
 }
 
 void execute_commands(char* commands[][100], int num_commands) { //ejecutar comando o comandos
-  int i, prev_pipe, fd[2];
-  prev_pipe = STDIN_FILENO;
-  pid_t pids[num_commands]; // Almacenar los PID de los procesos hijos
+  int i, prev_pipe, fd[2]; // una pipe y una variable para guardar la lectura anterior
+  prev_pipe = STDIN_FILENO; // standard input
 
   for (i = 0; i < num_commands; i++) {
     if (pipe(fd) == -1) {
@@ -52,98 +50,69 @@ void execute_commands(char* commands[][100], int num_commands) { //ejecutar coma
       perror("Error al crear el proceso hijo");
       exit(EXIT_FAILURE);
     } else if (pid == 0) { // Proceso hijo
-      // Redireccionar el pipe anterior a stdin
-      dup2(prev_pipe, STDIN_FILENO);
+      dup2(prev_pipe, STDIN_FILENO); // Redireccionar stdin al pipe anterior
       if (i != num_commands - 1) {
-        // Redireccionar stdout al pipe actual
-        dup2(fd[1], STDOUT_FILENO);
+        dup2(fd[1], STDOUT_FILENO); // Redireccionar stdout al pipe lectura actual
+        close(fd[1]);
       }
       close(fd[0]);
-      // Ejecutar el comando actual
-      if (execvp(commands[i][0], commands[i]) < 0) {
-        printf("Comando ingresado no existe\n");
-        exit(0);
+      if (execvp(commands[i][0], commands[i]) < 0) { // Ejecutar el comando actual
+        perror("Comando ingresado no existe\n");
+        exit(EXIT_FAILURE);
       }
-      //execvp(commands[i][0], commands[i])
-      //perror("execvp failed");
-      //exit(EXIT_FAILURE);
     } else {
-      wait(NULL);
-      // Cerrar el extremo de escritura del pipe actual (no es necesario en el proceso padre)
-      close(fd[1]);
-      // Guardar el extremo de lectura del pipe actual para la próxima iteración
-      prev_pipe = fd[0];
+      wait(NULL); // Esperar hijos
+      close(fd[1]); // Cerrar el extremo de escritura del pipe actual (no es necesario en el padre)
+      prev_pipe = fd[0]; // Guardar el extremo de lectura del pipe actual para la próxima iteración
     }
   }
 }
 
-void start_daemon(int t, int p) { //ejecutar el daemon
-  // Fork to create a daemon.
-  pid_t pid = fork();
-
+void start_daemon(int t, int p) { // Ejecutar el daemon
+  pid_t pid = fork(); // Fork para crear el daemon
   if (pid < 0) {
     printf("error en fork\n");
-    exit(1);
-  } else if (pid > 0) {
-    // Parent process (shell) displays a message.
+    exit(EXIT_FAILURE);
+  } else if (pid > 0) { // Proceso padre
     printf("Daemon creado con PID: %d\n", pid);
-    return; // Return to the shell.
+    return; // Retorna a la shell.
   }
-
-  // Child process (daemon) continues here.
-
-  // Create a new session and detach from the terminal.
-  setsid();
-
-  // Set the umask to an appropriate value.
-  umask(0);
-
-  // Open the system log.
-  openlog("mi_daemon", LOG_PID, LOG_DAEMON); //logea en syslog con nombre system_info_daemon
-
-  // Main loop to log system information.
+  // Proceso hijo (Daemon)
+  setsid(); // Crea una nueva sesion y se desprende de la terminal
+  umask(0); // Archivos utilizados por el daemon tienen los permisos necesarios
+  openlog("mi_daemon", LOG_PID, LOG_DAEMON); // logea en syslog con nombre "mi_daemon"
   while (p > 0) {
-    // Read and log system information from /proc/cpuinfo.
-    // Example: read from /proc/cpuinfo, collect the required data, and use syslog to log it.
+    // Recopilar la informacion neceseria de /proc/stat y luego registra en syslog
     FILE* cpuinfo_file = fopen("/proc/stat", "r"); //processes, procs_running y procs_blocked no estan en /proc/cpuinfo estan en /proc/stat
     if (cpuinfo_file == NULL) {
       perror("fopen");
       exit(EXIT_FAILURE);
     }
-
     char line[1024];
     while (fgets(line, sizeof(line), cpuinfo_file)) {
-      // Extract and log relevant information from /proc/cpuinfo.
+      // Extraer informacion relevante
       if (strstr(line, "processes") || strstr(line, "procs_running") || strstr(line, "procs_blocked")) { //si la linea corresponde a processes, procs_running o procs_blocked, la logea en syslog
-        syslog(LOG_INFO, "%s", line);
+        syslog(LOG_INFO, "%s", line); // escribe en syslog
       }
     }
     fclose(cpuinfo_file);
-
-    // Sleep for 't' seconds.
-    sleep(t);
-
-    // Decrease the remaining time.
-    p -= t;
+    sleep(t); // Duerme por t segundos
+    p -= t; // Decrementa el tiempo total
   }
-  // Clean up and exit.
-  closelog();
+  closelog(); // Cerrar el log y terminar
 }
 
 int main() {
   char* input;
   char* commands[100][100];
   int num_commands;
-
   while (1) {
     printf("mishell:$ ");
     input = read_input();
-
     if (strlen(input) <= 1) { //comando vacio (solo presionar enter)
       continue;
     }
     parse_input(input, commands, &num_commands); //parsear entrada
-
     if (strcmp(commands[0][0], "exit") == 0) { //terminar shell
       break;
     } else if (strcmp(commands[0][0], "daemon") == 0) { //comando para ejecutar daemon
@@ -158,6 +127,5 @@ int main() {
       execute_commands(commands, num_commands); //ejecutar comando o comandos
     }
   }
-  
   return 0;
 }
