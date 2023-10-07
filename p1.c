@@ -116,7 +116,7 @@ int main() {
     if (strcmp(commands[0][0], "exit") == 0) { //terminar shell
       break;
     } else if (strcmp(commands[0][0], "daemon") == 0) { //comando para ejecutar daemon
-      if (commands[0][1] == NULL && commands[0][2] == NULL) {
+      if (commands[0][2] == NULL) { //si se llama al daemon sin argumentos o con uno solo
         printf("Uso: daemon <t> <p>\n");
       } else {
         int t = atoi(commands[0][1]);
