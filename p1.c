@@ -82,7 +82,7 @@ void start_daemon(int t, int p) { // Ejecutar el daemon
   umask(0); // Archivos utilizados por el daemon tienen los permisos necesarios
   openlog("mi_daemon", LOG_PID, LOG_DAEMON); // logea en syslog con nombre "mi_daemon"
   while (p > 0) {
-    // Recopilar la informacion neceseria de /proc/stat y luego registra en syslog
+    // Recopilar la informacion necesaria de /proc/stat y luego registra en syslog
     FILE* cpuinfo_file = fopen("/proc/stat", "r"); //processes, procs_running y procs_blocked no estan en /proc/cpuinfo estan en /proc/stat
     if (cpuinfo_file == NULL) {
       perror("fopen");
