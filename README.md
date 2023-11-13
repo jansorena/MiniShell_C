@@ -1,4 +1,4 @@
-# Proyecto1_SistemasOperativos
+# MiniShell_C
 
 Para compilar la shell, se debe realizar make en el directorio correspondiente:
 
