@@ -1,24 +1,67 @@
-# MiniShell_C
+# Mini Shell
 
-Para compilar la shell, se debe realizar make en el directorio correspondiente:
+## Overview
+This project implements a simple shell in C that supports basic commands and piping. Additionally, it includes a daemon process that logs system information at specified intervals.
 
-	$ make
+## Features
+- Supports basic commands like `ls`, `echo`, `cat`, `grep`, `head`, `tail`, `wc`, `sort`, etc.
+- Supports piping between commands, e.g., `ps -aux | sort -nr -k 4 | head -10`.
+- Includes a daemon that logs system information to syslog.
 
-En caso de no contar con makefile utilizar:
+## Compilation
+To compile the shell, run `make` in the project directory:
+```bash
+$ make
+```
 
-	$ gcc -Wall -o mishell p1.c
-	$ ./mishell
+If you do not have make, you can compile using gcc:
+```bash
+$ gcc -Wall -o mishell p1.c
+$ ./mishell
+```
+## Usage
 
-La shell soporta comandos simples como ls, echo, cat, grep, head, tail, wc, sort, etc.
-Además, soporta comandos con pipes, del tipo $comando1 | comando2 | ... | comandon-ésimo tales como:
+### Running the Shell
 
-	mishell:$ ps -aux | sort -nr -k 4 | head -10
-	mishell:$ cat texto.txt | wc -w
+Start the shell by executing the compiled binary:
 
-Para crear un daemon que mida y registre una línea con la información requerida del sistema en el log del sistema cada t segundos por un tiempo total de p segundos, se debe ejecutar el siguiente comando dentro de la shell:
+```bash
+$ ./mishell
+```
 
-	mishell:$ daemon <t> <p>
-	
- Luego, para matarlo basta con ejecutar el comando kill junto con el PID del demonio (el cual es entregado) desde otra terminal, de la siguiente manera:
- 
- 	$ kill <PID>
+### Supported Commands
+You can run simple commands like:
+
+```bash
+mishell:$ ls
+mishell:$ echo "Hello, World!"
+mishell:$ cat file.txt
+```
+
+### Piping Commands
+You can also pipe commands:
+
+```bash
+mishell:$ ps -aux | sort -nr -k 4 | head -10
+mishell:$ cat texto.txt | wc -w
+```
+
+### Daemon
+To create a daemon that logs system information every t seconds for a total of p seconds, use the following command:
+
+```bash
+mishell:$ daemon <t> <p>
+```
+
+To stop the daemon, use the kill command with the PID provided by the daemon:
+
+```bash
+$ kill <PID>
+```
+
+### Cleaning Up
+To clean up the compiled files, run:
+
+```bash
+$ make clean
+```
